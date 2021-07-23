@@ -91,7 +91,8 @@ def hasStraight(firstCards,secondCards,playingCards,numOfPlayers):
         # Now try to find if there is an actual straight of 5 or more cards
         for c in range(len(sortedArr)):
                 if(straightFound==4 or (c==6 and straightFound==3 and sortedArr[0,0]==1)) : # the second condition reffers to the only option of having a 10,J,Q,K,A and the sorting cannot distinguish
-                    winningHands.append(firstCards[i],secondCards[i])
+                    winningHands.append(firstCards[i])
+                    winningHands.append(secondCards[i])
                 if (sortedArr[c,0] == (sortedArr[c+1,0] - 1) and c!=6):
                     straightFound += 1 
                 else: 
@@ -121,7 +122,8 @@ def hasFlush(firstCards,secondCards,playingCards,numOfPlayers):
         # Now try to find if there is an actual cards of 5 or more same shapes
         for c in range(len(sortedArr)):
                 if(clubs==4 or diamonds == 4 or hearts == 4 or spades == 4) : # flash found
-                    winningHands.append(firstCards[i],secondCards[i])
+                    winningHands.append(firstCards[i])
+                    winningHands.append(secondCards[i])
                 if(sortedArr[c,1] == 0):
                     clubs += 1
                 if(sortedArr[c,1] == 1):
@@ -136,16 +138,70 @@ def hasFlush(firstCards,secondCards,playingCards,numOfPlayers):
     else:
         return winningHands,False
 
+# Four of A Kind
+def hasFourOfAKind(firstCards,secondCards,playingCards,numOfPlayers):
+    winningHands = []
+    for i in range (numOfPlayers):
+        mixArray = np.empty(shape=[7,2])
+        for j in range(len(playingCards)):
+            mixArray[j] = playingCards[j]
+
+        mixArray[5] = firstCards[i] # insert first player's card
+        mixArray[6] = secondCards[i] # insert second player's card
+        sortedArr = mixArray[mixArray[:,0].argsort()]
+
+        
+        # Now try to find if there is an actual straight of 5 or more cards
+        for c in range(len(sortedArr)):
+            fourOfAKind = 0
+            for k in range(len(sortedArr)-c): # because if until the 4th element we didn't found any four of a kind the we wont either way
+                if (sortedArr[c,0] == (sortedArr[k+1,0])):
+                    fourOfAKind += 1
+            if(fourOfAKind==3):
+                winningHands.append(firstCards[i])
+                winningHands.append(secondCards[i])
+                break
+
+                
+    if(winningHands):
+        return winningHands,True
+    else:
+        return winningHands,False
+
+# Three of A Kind
 def hasThreeOfAKind(firstCards,secondCards,playingCards,numOfPlayers):
-    print("")
+    winningHands = []
+    for i in range (numOfPlayers):
+        mixArray = np.empty(shape=[7,2])
+        for j in range(len(playingCards)):
+            mixArray[j] = playingCards[j]
+
+        mixArray[5] = firstCards[i] # insert first player's card
+        mixArray[6] = secondCards[i] # insert second player's card
+        sortedArr = mixArray[mixArray[:,0].argsort()]
+
+        
+        # Now try to find if there is an actual straight of 5 or more cards
+        for c in range(len(sortedArr)):
+            fourOfAKind = 0
+            for k in range(len(sortedArr)-c): # because if until the 4th element we didn't found any four of a kind the we wont either way
+                if (sortedArr[c,0] == (sortedArr[k+1,0])):
+                    fourOfAKind += 1
+            if(fourOfAKind==2):
+                winningHands.append(firstCards[i])
+                winningHands.append(secondCards[i])
+                break
+
+                
+    if(winningHands):
+        return winningHands,True
+    else:
+        return winningHands,False
 
 def hasPair(firstCards,secondCards,playingCards,numOfPlayers):
     print("")
 
 def hasHighCard(firstCards,secondCards,playingCards,numOfPlayers):
-    print("")
-
-def hasFourOfAKind(firstCards,secondCards,playingCards,numOfPlayers):
     print("")
 
 if __name__ == "__main__":
@@ -159,7 +215,8 @@ if __name__ == "__main__":
         deckOfCards = filldeck(symbols)
         firstCards,secondCards = splitDeck(deckOfCards,numOfPlayers) # retrieve players cards
         playingCards = burnCards(deckOfCards) # retrieve shown up cards
-        hasStraight(firstCards,secondCards,playingCards,numOfPlayers)
+        testingCards = np.ones(shape=[5,2])
+        hasFourOfAKind(firstCards,secondCards,testingCards,numOfPlayers)
 
         answer = int(input("Give a positive number to play another round\n"))
 
