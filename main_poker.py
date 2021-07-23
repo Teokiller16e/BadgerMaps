@@ -50,6 +50,7 @@ def burnCards(deck):
     return playingCards
 
 def discard(playingCards,deck,flag):
+
     if flag==0:
         num = 3
     else: 
@@ -74,14 +75,65 @@ def discard(playingCards,deck,flag):
         indx = randint(0, (len(deck)-1))
     deck[indx] = 99
 
+
+def hasStraight(firstCards,secondCards,playingCards,numOfPlayers):
+
+    consecutiveArray = np.empty(shape=[7,2])
+    winningHands = []
+    
+    for i in range (numOfPlayers):
+        for j in range(len(playingCards)):
+            consecutiveArray[j] = playingCards[j]
+
+        consecutiveArray[5] = firstCards[i] # insert first player's card
+        consecutiveArray[6] = secondCards[i] # insert second player's card
+        sortedArr = consecutiveArray[consecutiveArray[:,0].argsort()]
+        straightFound = 0
+
+        # Now try to find if there is an actual straight of 5 or more cards
+        for c in range(len(sortedArr)-1):
+                if(straightFound==4 or (c==6 and straightFound==3 and sortedArr[0,0]==1)) : # the second condition reffers to the only option of having a 10,J,Q,K,A and the sorting cannot distinguish
+                    winningHands.append(firstCards[i],secondCards[i])
+                if (sortedArr[c,0] == (sortedArr[c+1,0] - 1)):
+                    straightFound += 1 
+                else: 
+                    straightFound = 0
+    if(winningHands):
+        return winningHands,True
+    else:
+        return winningHands,False
+
+
+def hasFlush():
+    print("")
+
+def hasThreeOfAKind():
+    print("")
+
+def hasPair():
+    print("")
+
+def hasHighCard():
+    print("")
+
+def hasFourOfAKind():
+    print("")
+
 if __name__ == "__main__":
     symbols =  [0,1,2,3] # ['clubs','diamonds','hearts','spades']
-    deckOfCards = filldeck(symbols)
     numOfPlayers = int(input("Welcome to Badger Map's poker, please give the number of players \n")) # define the number of players 
     while numOfPlayers<2  and numOfPlayers>7:
         numOfPlayers = int(input(" The number you specified is not between the authorized limits, please give number of players between 2 and 7 \n"))
-    firstCards,secondCards = splitDeck(deckOfCards,numOfPlayers) # retrieve players cards
-    playingCards = burnCards(deckOfCards) # retrieve shown up cards 
+
+    answer = int(input("Give a positive number to start the game\n")) # Starting round
+    while answer>0:
+        deckOfCards = filldeck(symbols)
+        firstCards,secondCards = splitDeck(deckOfCards,numOfPlayers) # retrieve players cards
+        playingCards = burnCards(deckOfCards) # retrieve shown up cards
+        hasStraight(firstCards,secondCards,playingCards,numOfPlayers)
+
+        answer = int(input("Give a positive number to play another round\n"))
+
 
    
 
