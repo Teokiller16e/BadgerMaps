@@ -46,7 +46,6 @@ def burnCards(deck):
     playingCards = np.empty(shape=[5,2])
     for i in range(3):
         discard(playingCards,deck,i)
-    print(deck) 
     return playingCards
 
 def discard(playingCards,deck,flag):
@@ -75,26 +74,25 @@ def discard(playingCards,deck,flag):
         indx = randint(0, (len(deck)-1))
     deck[indx] = 99
 
-
+# Straight
 def hasStraight(firstCards,secondCards,playingCards,numOfPlayers):
 
-    consecutiveArray = np.empty(shape=[7,2])
     winningHands = []
-    
     for i in range (numOfPlayers):
+        mixArray = np.empty(shape=[7,2])
         for j in range(len(playingCards)):
-            consecutiveArray[j] = playingCards[j]
+            mixArray[j] = playingCards[j]
 
-        consecutiveArray[5] = firstCards[i] # insert first player's card
-        consecutiveArray[6] = secondCards[i] # insert second player's card
-        sortedArr = consecutiveArray[consecutiveArray[:,0].argsort()]
+        mixArray[5] = firstCards[i] # insert first player's card
+        mixArray[6] = secondCards[i] # insert second player's card
+        sortedArr = mixArray[mixArray[:,0].argsort()]
         straightFound = 0
 
         # Now try to find if there is an actual straight of 5 or more cards
-        for c in range(len(sortedArr)-1):
+        for c in range(len(sortedArr)):
                 if(straightFound==4 or (c==6 and straightFound==3 and sortedArr[0,0]==1)) : # the second condition reffers to the only option of having a 10,J,Q,K,A and the sorting cannot distinguish
                     winningHands.append(firstCards[i],secondCards[i])
-                if (sortedArr[c,0] == (sortedArr[c+1,0] - 1)):
+                if (sortedArr[c,0] == (sortedArr[c+1,0] - 1) and c!=6):
                     straightFound += 1 
                 else: 
                     straightFound = 0
@@ -103,20 +101,51 @@ def hasStraight(firstCards,secondCards,playingCards,numOfPlayers):
     else:
         return winningHands,False
 
+# Flash
+def hasFlush(firstCards,secondCards,playingCards,numOfPlayers):
+    winningHands = []
+    for i in range (numOfPlayers):
+        mixArray = np.empty(shape=[7,2])
+        for j in range(len(playingCards)):
+            mixArray[j] = playingCards[j]
 
-def hasFlush():
+        mixArray[5] = firstCards[i] # insert first player's card
+        mixArray[6] = secondCards[i] # insert second player's card
+        sortedArr = mixArray[mixArray[:,0].argsort()]
+
+        clubs = 0
+        diamonds = 0
+        hearts = 0
+        spades = 0
+
+        # Now try to find if there is an actual cards of 5 or more same shapes
+        for c in range(len(sortedArr)):
+                if(clubs==4 or diamonds == 4 or hearts == 4 or spades == 4) : # flash found
+                    winningHands.append(firstCards[i],secondCards[i])
+                if(sortedArr[c,1] == 0):
+                    clubs += 1
+                if(sortedArr[c,1] == 1):
+                    diamonds += 1
+                if(sortedArr[c,1] == 2):
+                    hearts += 1
+                if(sortedArr[c,1] == 3):
+                    spades += 1
+                    
+    if(winningHands):
+        return winningHands,True
+    else:
+        return winningHands,False
+
+def hasThreeOfAKind(firstCards,secondCards,playingCards,numOfPlayers):
     print("")
 
-def hasThreeOfAKind():
+def hasPair(firstCards,secondCards,playingCards,numOfPlayers):
     print("")
 
-def hasPair():
+def hasHighCard(firstCards,secondCards,playingCards,numOfPlayers):
     print("")
 
-def hasHighCard():
-    print("")
-
-def hasFourOfAKind():
+def hasFourOfAKind(firstCards,secondCards,playingCards,numOfPlayers):
     print("")
 
 if __name__ == "__main__":
