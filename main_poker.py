@@ -109,7 +109,8 @@ def hasStraightFlush(firstCards,secondCards,playingCards,numOfPlayers):
     test = []
 
     if(flagFLS and flagSTR):
-        return "STRAIGHTFLUSH",test
+        if(winningHandsFlush == winningHandsStraight):
+            return "STRAIGHTFLUSH",winningHandsStraight
     elif(flagFour): 
         return "FOUROFAKIND",winningHandsFourOfAKind
     elif(flagFLS and flagSTR==False):
@@ -132,7 +133,7 @@ def hasStraight(firstCards,secondCards,playingCards,numOfPlayers):
         for j in range(len(playingCards)):
             mixArray[j] = playingCards[j]
 
-        mixArray[5] = firstCards[i] # insert first player's card
+        mixArray[5] = firstCards[i] # insert first player's card (of course we can j +1 but since we know it's final there is no use)
         mixArray[6] = secondCards[i] # insert second player's card
         sortedArr = mixArray[mixArray[:,0].argsort()]
         straightFound = 0
@@ -141,14 +142,16 @@ def hasStraight(firstCards,secondCards,playingCards,numOfPlayers):
         for c in range(len(sortedArr)-1):    
             if (sortedArr[c,0] == (sortedArr[c+1,0] - 1) ):
                 straightFound += 1 
-            else: 
+            elif(sortedArr[c,0] == (sortedArr[c+1,0])): # because it might be that we have duplicate cards to the sorted array
+                continue
+            elif(straightFound<4): 
                 straightFound = 0
 
         # the second condition reffers to the only option of having a 10,J,Q,K,A and the sorting cannot distinguish
         if(straightFound==4 or(sortedArr[0,0]==1 and sortedArr[3,0]==10 and sortedArr[4,0]==11 and sortedArr[5,0]==12 and sortedArr[6,0]==13)) : 
                     winningHands.append(firstCards[i])
                     winningHands.append(secondCards[i])
-                    break
+                    
 
     arr = np.array(winningHands)
     if(winningHands):
@@ -277,7 +280,6 @@ def hasTwoPair(firstCards,secondCards,playingCards,numOfPlayers):
     else:
         return twoPairs,False
 
-
 # HasPair
 def hasPair(firstCards,secondCards,playingCards,numOfPlayers):
     winningHands = []
@@ -330,7 +332,7 @@ def hasHighCard(firstCards,secondCards,numOfPlayers):
     
     return arr,True # because it's the least strong combination and therefore there will always be a max number 
 
-
+# Print winner with symbol strings
 def printWinner(resultCards,symbols):
     for i in range(len(resultCards)):
         if(resultCards[i,1] == 0):
@@ -361,9 +363,10 @@ if __name__ == "__main__":
         if(RF):
             printWinner(result)
         else:
-            playingCards[0,1]=0
-            playingCards[1,1]=0
-            playingCards[2,1]=0
+            playingCards[0,0]=7
+            playingCards[1,0]=8
+            playingCards[2,0]=9
+            playingCards[3,0]=10
             strOrFl,res = hasStraightFlush(firstCards,secondCards,playingCards,numOfPlayers) 
             if (strOrFl=="STRAIGHTFLUSH"):
                 print()
