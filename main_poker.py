@@ -89,11 +89,12 @@ def hasRoyalFlush(firstCards,secondCards,playingCards,numOfPlayers):
         mixArray[6] = secondCards[i] # insert second player's card
         sortedArr = mixArray[mixArray[:,0].argsort()]
 
-        if(sortedArr[0]==1 and sortedArr[3]==10 and sortedArr[4]==11 and sortedArr[5]==12 and sortedArr[6]==13) : # the condition reffers to the only option of having a 10,J,Q,K,A 
-            winningHands.append(firstCards[i])
-            winningHands.append(secondCards[i])
+    # the condition reffers to the only option of having a 10,J,Q,K,A  and same color
+        if(sortedArr[0,0]==1 and sortedArr[3,0]==10 and sortedArr[4,0]==11 and sortedArr[5,0]==12 and sortedArr[6,0]==13) :
+            if(sortedArr[0,1]== sortedArr[3,1]== sortedArr[4,1]== sortedArr[5,1]== sortedArr[6,1]) :
+                winningHands.append(firstCards[i])
+                winningHands.append(secondCards[i])
         
-
     arr = np.array(winningHands)
     if(winningHands):
         return arr,True
@@ -101,15 +102,21 @@ def hasRoyalFlush(firstCards,secondCards,playingCards,numOfPlayers):
         return arr,False   
 
 def hasStraightFlush(firstCards,secondCards,playingCards,numOfPlayers):
-    winningHandsStraight,flagSTR = hasStraight(firstCards,secondCards,playingCards,numOfPlayers)
+    
     winningHandsFlush,flagFLS = hasFlush(firstCards,secondCards,playingCards,numOfPlayers)
+    winningHandsStraight,flagSTR = hasStraight(firstCards,secondCards,playingCards,numOfPlayers)
+    winningHandsFourOfAKind,flagFour = hasFourOfAKind(firstCards,secondCards,playingCards,numOfPlayers)
+    test = []
+
     if(flagFLS and flagSTR):
-        print("")
+        return "STRAIGHTFLUSH",test
+    elif(flagFour): 
+        return "FOUROFAKIND",winningHandsFourOfAKind
     elif(flagFLS and flagSTR==False):
-        return "flush",winningHandsFlush
+        return "FLUSH",winningHandsFlush
     elif(flagFLS==False and flagSTR):
-        return "straight",winningHandsStraight
-    else :return "none"
+        return "STRAIGHT",winningHandsStraight
+    else: return "none",test
 
 
 def hasFullHouse(firstCards,secondCards,playingCards,numOfPlayers):
@@ -131,12 +138,14 @@ def hasStraight(firstCards,secondCards,playingCards,numOfPlayers):
         straightFound = 0
 
         # Now try to find if there is an actual straight of 5 or more cards
-        for c in range(len(sortedArr)):    
-            if (sortedArr[c,0] == (sortedArr[c+1,0] - 1) and c!=6):
+        for c in range(len(sortedArr)-1):    
+            if (sortedArr[c,0] == (sortedArr[c+1,0] - 1) ):
                 straightFound += 1 
             else: 
                 straightFound = 0
-        if(straightFound==4 or(sortedArr[0]==1 and sortedArr[3]==10 and sortedArr[4]==11 and sortedArr[5]==12 and sortedArr[6]==13)) : # the second condition reffers to the only option of having a 10,J,Q,K,A and the sorting cannot distinguish
+
+        # the second condition reffers to the only option of having a 10,J,Q,K,A and the sorting cannot distinguish
+        if(straightFound==4 or(sortedArr[0,0]==1 and sortedArr[3,0]==10 and sortedArr[4,0]==11 and sortedArr[5,0]==12 and sortedArr[6,0]==13)) : 
                     winningHands.append(firstCards[i])
                     winningHands.append(secondCards[i])
                     break
@@ -166,16 +175,16 @@ def hasFlush(firstCards,secondCards,playingCards,numOfPlayers):
 
         # Now try to find if there is an actual cards of 5 or more same shapes
         for c in range(len(sortedArr)):
-                if(clubs==4 or diamonds == 4 or hearts == 4 or spades == 4) : # flash found
+                if(clubs>4 or diamonds > 4 or hearts >4  or spades > 4) : # flash found
                     winningHands.append(firstCards[i])
                     winningHands.append(secondCards[i])
-                if(sortedArr[c,1] == 0):
+                elif(sortedArr[c,1] == 0):
                     clubs += 1
-                if(sortedArr[c,1] == 1):
+                elif(sortedArr[c,1] == 1):
                     diamonds += 1
-                if(sortedArr[c,1] == 2):
+                elif(sortedArr[c,1] == 2):
                     hearts += 1
-                if(sortedArr[c,1] == 3):
+                else:
                     spades += 1
                     
     arr = np.array(winningHands)
@@ -321,18 +330,51 @@ def hasHighCard(firstCards,secondCards,numOfPlayers):
     
     return arr,True # because it's the least strong combination and therefore there will always be a max number 
 
+
+def printWinner(resultCards,symbols):
+    for i in range(len(resultCards)):
+        if(resultCards[i,1] == 0):
+            print(resultCards[i,0],"  clubs ",)
+        elif (resultCards[i,1] == 1):
+            print(resultCards[i,0],"  diamonds ",)
+        elif (resultCards[i,1]==2):
+            print(resultCards[i,0],"  hearts ",)
+        else : print(resultCards[i,0],"  spades ",)
+
 if __name__ == "__main__":
+
     symbols =  [0,1,2,3] # ['clubs','diamonds','hearts','spades']
     numOfPlayers = int(input("Welcome to Badger Map's poker, please give the number of players \n")) # define the number of players 
     while numOfPlayers<2  or numOfPlayers>7:
         numOfPlayers = int(input(" The number you specified is not between the authorized limits, please give number of players between 2 and 7 \n"))
 
-    answer = int(input("Give a positive number to start the game\n")) # Starting round
+    answer = int(input("Give a positive number to start the game\n")) # Starting round:
+
     while answer>0:
         deckOfCards = filldeck(symbols)
         firstCards,secondCards = splitDeck(deckOfCards,numOfPlayers) # retrieve players cards
         playingCards = burnCards(deckOfCards) # retrieve shown up cards
-        hasTwoPair(firstCards,secondCards,playingCards,numOfPlayers)
+        
+        # We have to check from the higher to the lower hand payoff so we can exclude as much as we can:
+        result,RF = hasRoyalFlush(firstCards,secondCards,playingCards,numOfPlayers)
+        # In this step we will check if have Royal Flush, Straight Flush, Straight or Flush
+        if(RF):
+            printWinner(result)
+        else:
+            playingCards[0,1]=0
+            playingCards[1,1]=0
+            playingCards[2,1]=0
+            strOrFl,res = hasStraightFlush(firstCards,secondCards,playingCards,numOfPlayers) 
+            if (strOrFl=="STRAIGHTFLUSH"):
+                print()
+            elif (strOrFl=="FOUROFAKIND"):
+              print()
+            elif (strOrFl=="FLUSH"):
+              print()
+            elif (strOrFl=="STRAIGHT"):
+              print()
+            else:
+                print("None of the above")
         answer = int(input("Give a positive number to play another round\n"))
     print("Today's match is over !!")
 
