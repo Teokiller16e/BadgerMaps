@@ -1,6 +1,7 @@
+from typing import Counter
 import numpy as np
 from random import randint
-
+import collections
 from numpy.lib.function_base import append
 
 
@@ -43,7 +44,6 @@ def splitDeck (deck,numPlayers):
     # return numpy array's with players first and second cards        
     return firstCards,secondCards
     
-
 def burnCards(deck):
     playingCards = np.empty(shape=[5,2])
     for i in range(3):
@@ -77,11 +77,40 @@ def discard(playingCards,deck,flag):
     deck[indx] = 99
 
 
+# HasRoyalFlush
 def hasRoyalFlush(firstCards,secondCards,playingCards,numOfPlayers):
-    print("hello")
+    winningHands = []
+    for i in range (numOfPlayers):
+        mixArray = np.empty(shape=[7,2])
+        for j in range(len(playingCards)):
+            mixArray[j] = playingCards[j]
+
+        mixArray[5] = firstCards[i] # insert first player's card
+        mixArray[6] = secondCards[i] # insert second player's card
+        sortedArr = mixArray[mixArray[:,0].argsort()]
+
+        if(sortedArr[0]==1 and sortedArr[3]==10 and sortedArr[4]==11 and sortedArr[5]==12 and sortedArr[6]==13) : # the condition reffers to the only option of having a 10,J,Q,K,A 
+            winningHands.append(firstCards[i])
+            winningHands.append(secondCards[i])
+        
+
+    arr = np.array(winningHands)
+    if(winningHands):
+        return arr,True
+    else:
+        return arr,False   
 
 def hasStraightFlush(firstCards,secondCards,playingCards,numOfPlayers):
-    print("hello")
+    winningHandsStraight,flagSTR = hasStraight(firstCards,secondCards,playingCards,numOfPlayers)
+    winningHandsFlush,flagFLS = hasFlush(firstCards,secondCards,playingCards,numOfPlayers)
+    if(flagFLS and flagSTR):
+        print("")
+    elif(flagFLS and flagSTR==False):
+        return "flush",winningHandsFlush
+    elif(flagFLS==False and flagSTR):
+        return "straight",winningHandsStraight
+    else :return "none"
+
 
 def hasFullHouse(firstCards,secondCards,playingCards,numOfPlayers):
     print("hello")
@@ -107,14 +136,16 @@ def hasStraight(firstCards,secondCards,playingCards,numOfPlayers):
                 straightFound += 1 
             else: 
                 straightFound = 0
-        if(straightFound==4 or(sortedArr[0]==0 and sortedArr[3]==10 and sortedArr[4]==11 and sortedArr[5]==12 and sortedArr[6]==13)) : # the second condition reffers to the only option of having a 10,J,Q,K,A and the sorting cannot distinguish
+        if(straightFound==4 or(sortedArr[0]==1 and sortedArr[3]==10 and sortedArr[4]==11 and sortedArr[5]==12 and sortedArr[6]==13)) : # the second condition reffers to the only option of having a 10,J,Q,K,A and the sorting cannot distinguish
                     winningHands.append(firstCards[i])
                     winningHands.append(secondCards[i])
                     break
+
+    arr = np.array(winningHands)
     if(winningHands):
-        return winningHands,True
+        return arr,True
     else:
-        return winningHands,False
+        return arr,False
 
 # Flash
 def hasFlush(firstCards,secondCards,playingCards,numOfPlayers):
@@ -147,10 +178,11 @@ def hasFlush(firstCards,secondCards,playingCards,numOfPlayers):
                 if(sortedArr[c,1] == 3):
                     spades += 1
                     
+    arr = np.array(winningHands)
     if(winningHands):
-        return winningHands,True
+        return arr,True
     else:
-        return winningHands,False
+        return arr,False
 
 # Four of A Kind
 def hasFourOfAKind(firstCards,secondCards,playingCards,numOfPlayers):
@@ -178,10 +210,11 @@ def hasFourOfAKind(firstCards,secondCards,playingCards,numOfPlayers):
                 break
 
                 
+    arr = np.array(winningHands)
     if(winningHands):
-        return winningHands,True
+        return arr,True
     else:
-        return winningHands,False
+        return arr,False
 
 # Three of A Kind
 def hasThreeOfAKind(firstCards,secondCards,playingCards,numOfPlayers):
@@ -206,18 +239,37 @@ def hasThreeOfAKind(firstCards,secondCards,playingCards,numOfPlayers):
             if(threeOfAKind==3):
                 winningHands.append(firstCards[i])
                 winningHands.append(secondCards[i])
-                break
+                #break
 
                 
+    arr = np.array(winningHands)
     if(winningHands):
-        return winningHands,True
+        return arr,True
     else:
-        return winningHands,False
+        return arr,False
 
 def hasTwoPair(firstCards,secondCards,playingCards,numOfPlayers):
-    print("")
+    winningHands,flag = hasPair(firstCards,secondCards,playingCards,numOfPlayers) 
+    twoPairs = []
 
-# To be tested
+    arr = np.array(winningHands)
+
+    if(flag):
+        for i in range(len(arr)):
+            count = 0
+            for j in range(len(arr)-i):
+                if ((arr[i,0] == arr[j+i,0]) and arr[i,1] == arr[j+i,1]):
+                    count += 1
+            if(count>=2):
+                twoPairs.append(arr[i])
+        
+    if(twoPairs):
+        return twoPairs,True
+    else:
+        return twoPairs,False
+
+
+# HasPair
 def hasPair(firstCards,secondCards,playingCards,numOfPlayers):
     winningHands = []
     for i in range (numOfPlayers):
@@ -232,20 +284,20 @@ def hasPair(firstCards,secondCards,playingCards,numOfPlayers):
         
         # Now try to find if there is an actual straight of 5 or more cards
         for c in range(len(sortedArr)):
-            threeOfAKind = 0
+            pair = 0
             for k in range(len(sortedArr)-c): # because if until the 4th element we didn't found any four of a kind the we wont either way
                 if(k<6):
                     if (sortedArr[c,0] == (sortedArr[k+c,0])):
-                        threeOfAKind += 1
-            if(threeOfAKind==2):
+                        pair += 1
+            if(pair==2):
                 winningHands.append(firstCards[i])
                 winningHands.append(secondCards[i])
-                break
-
+                
+    arr = np.array(winningHands)
     if(winningHands):
-        return winningHands,True
+        return arr,True
     else:
-        return winningHands,False
+        return arr,False
 
 # High Card 
 def hasHighCard(firstCards,secondCards,numOfPlayers):
@@ -265,12 +317,14 @@ def hasHighCard(firstCards,secondCards,numOfPlayers):
         winningHands.append(firstCards[indices[i]])
         winningHands.append(secondCards[indices[i]])
 
-    return winningHands,True # because it's the least strong combination and therefore there will always be a max number 
+    arr = np.array(winningHands)
+    
+    return arr,True # because it's the least strong combination and therefore there will always be a max number 
 
 if __name__ == "__main__":
     symbols =  [0,1,2,3] # ['clubs','diamonds','hearts','spades']
     numOfPlayers = int(input("Welcome to Badger Map's poker, please give the number of players \n")) # define the number of players 
-    while numOfPlayers<2  and numOfPlayers>7:
+    while numOfPlayers<2  or numOfPlayers>7:
         numOfPlayers = int(input(" The number you specified is not between the authorized limits, please give number of players between 2 and 7 \n"))
 
     answer = int(input("Give a positive number to start the game\n")) # Starting round
@@ -278,13 +332,9 @@ if __name__ == "__main__":
         deckOfCards = filldeck(symbols)
         firstCards,secondCards = splitDeck(deckOfCards,numOfPlayers) # retrieve players cards
         playingCards = burnCards(deckOfCards) # retrieve shown up cards
-        testingCards = np.ones(shape=[5,2])
-        testingCards[3]= 0
-        testingCards[4]= 0
-        #hasFourOfAKind(firstCards,secondCards,testingCards,numOfPlayers)
-        hasHighCard(firstCards,secondCards,numOfPlayers)
+        hasTwoPair(firstCards,secondCards,playingCards,numOfPlayers)
         answer = int(input("Give a positive number to play another round\n"))
-
+    print("Today's match is over !!")
 
    
 
