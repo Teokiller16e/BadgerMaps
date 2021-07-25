@@ -121,9 +121,13 @@ def hasStraightFlush(firstCards,secondCards,playingCards,numOfPlayers):
         return "STRAIGHT",winningHandsStraight
     else: return "none",test
 
-# Not yet implemented
+# Not yet fully implemented due to time limit
 def hasFullHouse(firstCards,secondCards,playingCards,numOfPlayers):
-    print("hello")
+    strOfThree,res = hasThreeOfAKind(firstCards,secondCards,playingCards,numOfPlayers)
+    strOfTwo,res = hasPair(firstCards,secondCards,playingCards,numOfPlayers)
+    if(strOfThree == "ThreeOfAKind" and strOfTwo):
+        return "FULL",res
+    else : return "None",[]
     # basically we have to call the three of a kind and the has two pair function and if we find 3 cards and 2 different from the 2/3 then we have a full house
 
 # Straight
@@ -371,9 +375,31 @@ def outcomes(res,strAnswer,playingCards):
         printWinner(res)
     elif(len(result)== 2*numOfPlayers):
         highCardSplit = hasHighCard(firstCards,secondCards,numOfPlayers)
+        print("KICKER")
+        print("Cards on the table : \n")
+        printWinner(playingCards)
+        print("Winning hand : \n")
+        printWinner(highCardSplit)
     else: 
-        if(strAnswer=="ThreeOfAKind" or strAnswer == "TwoPairs" or strAnswer=="OnePair"):
-            hasHigherPair(res,playingCards)
+        if(strAnswer=="FOUROFAKIND" or strAnswer=="ThreeOfAKind" or strAnswer == "TwoPairs" or strAnswer=="OnePair" ):
+            strOutcome,winner = hasHigherPair(res,playingCards)
+            print(strAnswer)
+            print("Cards on the table : \n")
+            printWinner(playingCards)
+            print("Winning hand : \n")
+            printWinner(winner)
+        elif(strAnswer=="STRAIGHT"):
+            print(strAnswer)
+            print("Cards on the table : \n")
+            printWinner(playingCards)
+            print("SPLIT : \n")
+            printWinner(res)
+        elif(strAnswer=="FLUSH"):
+            print(strAnswer)
+            print("Cards on the table : \n")
+            printWinner(playingCards)
+            print("SPLIT : \n")
+            printWinner(res)
 
 
 # Higher Pair winner 
@@ -401,7 +427,6 @@ def hasHigherPair(res,playingCards):
         sortedArr = mixArray[mixArray[:,0].argsort()]
 
         for k in range(len(sortedArr)):
-            print(sortedArr[k,0])
             if(firstCards[i][0] == sortedArr[k,0] or secondCards[i][0] == sortedArr[k,0]):
                 if((firstCards[i][0] == sortedArr[k,0] == 1) or (secondCards[i][0] == sortedArr[k,0] == 1)):
                    tmp+= 14*14
@@ -426,14 +451,9 @@ def hasHigherPair(res,playingCards):
             winningPair.append(secondCards[indices[i]])
 
         arr = np.array(winningPair) 
-        return arr
+        return "Winner",arr
 
-def hasHigherStraight():
-    print()
-def hasHigherFlush():
-    print()
 
-    
 if __name__ == "__main__":
 
     symbols =  [0,1,2,3] # ['clubs','diamonds','hearts','spades']
@@ -462,6 +482,8 @@ if __name__ == "__main__":
                 outcomes(res,strOrFl,playingCards) # Case that straight flush is already on the table 
             elif (strOrFl=="FOUROFAKIND"):
                 outcomes(res,strOrFl,playingCards)# Case that four of a kind is already on the table
+#            elif (strOrFl=="FULL"):
+#                outcomes(res,strOrFl,playingCards)# Case that full house is already on the table
             elif (strOrFl=="FLUSH"):
                 outcomes(res,strOrFl,playingCards)# Case that flush is already on the table
             elif (strOrFl=="STRAIGHT"):
