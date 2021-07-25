@@ -221,7 +221,7 @@ def hasFourOfAKind(firstCards,secondCards,playingCards,numOfPlayers):
             if(fourOfAKind==4):
                 winningHands.append(firstCards[i])
                 winningHands.append(secondCards[i])
-                break
+                #break
 
                 
     arr = np.array(winningHands)
@@ -253,14 +253,14 @@ def hasThreeOfAKind(firstCards,secondCards,playingCards,numOfPlayers):
             if(threeOfAKind==3):
                 winningHands.append(firstCards[i])
                 winningHands.append(secondCards[i])
-                #break
+                #break in this case contrary to four of a kind there can be 2 x three of a kind
 
                 
     arr = np.array(winningHands)
     if(winningHands):
-        return arr,"True"
+        return "ThreeOfAKind",arr
     else:
-        return arr,False
+        return "False",arr
 
 def hasTwoPair(firstCards,secondCards,playingCards,numOfPlayers):
     winningHands,flag = hasPair(firstCards,secondCards,playingCards,numOfPlayers) 
@@ -277,10 +277,13 @@ def hasTwoPair(firstCards,secondCards,playingCards,numOfPlayers):
             if(count>=2):
                 twoPairs.append(arr[i])
         
+    twoPairs = list(dict.fromkeys(twoPairs))
+
     if(twoPairs):
-        return twoPairs,True
-    else:
-        return twoPairs,False
+        return "TwoPairs",twoPairs
+    elif(len(winningHands)>=2):
+        return "OnePair",winningHands
+    else: return "False",[]
 
 # HasPair
 def hasPair(firstCards,secondCards,playingCards,numOfPlayers):
@@ -332,7 +335,7 @@ def hasHighCard(firstCards,secondCards,numOfPlayers):
 
     arr = np.array(winningHands)
     
-    return arr,True # because it's the least strong combination and therefore there will always be a max number 
+    return arr # because it's the least strong combination and therefore there will always be a max number 
 
 # Print winner with symbol strings
 def printWinner(resultCards):
@@ -345,6 +348,17 @@ def printWinner(resultCards):
             print(resultCards[i,0],"  hearts ",)
         else : print(resultCards[i,0],"  spades ",)
     print(" \n")
+
+# Outcome possible conditions:
+def outcomes(res,strAnswer):
+    if(len(res)==2):
+        print(strAnswer)
+        print("Cards on the table : \n")
+        printWinner(playingCards)
+        print("Winning hand : \n")
+        printWinner(res)
+    elif(len(result)== 2*numOfPlayers):
+        highCardSplit = hasHighCard(firstCards,secondCards,numOfPlayers)
 
 if __name__ == "__main__":
 
@@ -359,50 +373,43 @@ if __name__ == "__main__":
         deckOfCards = filldeck(symbols)
         firstCards,secondCards = splitDeck(deckOfCards,numOfPlayers) # retrieve players cards
         playingCards = burnCards(deckOfCards) # retrieve shown up cards
-        
         # We have to check from the higher to the lower hand payoff so we can exclude as much as we can:
         result,RF = hasRoyalFlush(firstCards,secondCards,playingCards,numOfPlayers)
-        # In this step we will check if have Royal Flush, Straight Flush, Straight or Flush
+
+
+        # In this step we will check if have Royal Flush and in the Straight Flush all the between hierarchical winner hand will be checked one by one 
         if(RF):
-            if(len(result)==2):
-                    print(strOrFl)
-                    printWinner(playingCards)
-                    printWinner(result)
+            outcomes(res,"ROYALFLUSH") # Case that royal flush is already on the table
         else:
             strOrFl,res = hasStraightFlush(firstCards,secondCards,playingCards,numOfPlayers)
 
             if (strOrFl=="STRAIGHTFLUSH"):
-                if(len(res)==2):
-                    print(strOrFl)
-                    printWinner(playingCards)
-                    printWinner(res)
+                outcomes(res,strOrFl) # Case that straight flush is already on the table 
             elif (strOrFl=="FOUROFAKIND"):
-              if(len(res)==2):
-                    print(strOrFl)
-                    printWinner(playingCards)
-                    printWinner(res)
+                outcomes(res,strOrFl)# Case that four of a kind is already on the table
             elif (strOrFl=="FLUSH"):
-              if(len(res)==2):
-                    print(strOrFl)
-                    printWinner(playingCards)
-                    printWinner(res)
+                outcomes(res,strOrFl)# Case that flush is already on the table
             elif (strOrFl=="STRAIGHT"):
-              if(len(res)==2):
-                    print(strOrFl)
-                    printWinner(playingCards)
-                    printWinner(res)
+                outcomes(res,strOrFl) # Case that straight is already on the table
             else:
-                strOrFl,res = hasThreeOfAKind(firstCards,secondCards,playingCards,numOfPlayers)
-                if (strOrFl==True):
-                    if(len(res)==2):
-                        print(strOrFl)
-                        printWinner(playingCards)
-                        printWinner(res)
-                elif(strOrFl==False):
+                strOfThree,res = hasThreeOfAKind(firstCards,secondCards,playingCards,numOfPlayers)
+                if (strOfThree=="ThreeOfAKind"):
+                    outcomes(res,strOfThree) # Case that straight is already on the table
+                else:
                     strOfPairs,res = hasTwoPair(firstCards,secondCards,playingCards,numOfPlayers)
-
-
-
+                    if(strOfPairs == "TwoPairs"):
+                        outcomes(res,strOfPairs)
+                    elif(strOfPairs=="OnePair"):
+                        if(len(res)==2):
+                            print(strOfPairs)
+                            print("Cards on the table : \n")
+                            printWinner(playingCards)
+                            print("Winning hand : \n")
+                            printWinner(res)
+                        if(len(result) == 2 * numOfPlayers):
+                            print("Higher pair wins here and that goes for one pair as well")
+                    else:
+                        print("High card will decide it")
         answer = int(input("Give a positive number to play another round\n"))
     print("Today's match is over !!")
 
