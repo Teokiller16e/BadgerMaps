@@ -337,6 +337,17 @@ def hasHighCard(firstCards,secondCards,numOfPlayers):
     
     return arr # because it's the least strong combination and therefore there will always be a max number 
 
+# Print players initial hands 
+def printInitialHands(firstCards,secondCards):
+    initialCards = []
+    for i in range (len(firstCards)):
+            initialCards.append(firstCards[i])
+            initialCards.append(secondCards[i])
+
+    arr = np.array(initialCards)
+    print("Initial hand cards, 2 for each player : \n")
+    printWinner(arr)
+
 # Print winner with symbol strings
 def printWinner(resultCards):
     for i in range(len(resultCards)):
@@ -373,6 +384,7 @@ if __name__ == "__main__":
         deckOfCards = filldeck(symbols)
         firstCards,secondCards = splitDeck(deckOfCards,numOfPlayers) # retrieve players cards
         playingCards = burnCards(deckOfCards) # retrieve shown up cards
+        printInitialHands(firstCards,secondCards)
         # We have to check from the higher to the lower hand payoff so we can exclude as much as we can:
         result,RF = hasRoyalFlush(firstCards,secondCards,playingCards,numOfPlayers)
 
@@ -400,16 +412,10 @@ if __name__ == "__main__":
                     if(strOfPairs == "TwoPairs"):
                         outcomes(res,strOfPairs)
                     elif(strOfPairs=="OnePair"):
-                        if(len(res)==2):
-                            print(strOfPairs)
-                            print("Cards on the table : \n")
-                            printWinner(playingCards)
-                            print("Winning hand : \n")
-                            printWinner(res)
-                        if(len(result) == 2 * numOfPlayers):
-                            print("Higher pair wins here and that goes for one pair as well")
+                        outcomes(res,strOfPairs)
                     else:
-                        print("High card will decide it")
+                        highCardSplit = hasHighCard(firstCards,secondCards,numOfPlayers)
+                        printWinner(highCardSplit)
         answer = int(input("Give a positive number to play another round\n"))
     print("Today's match is over !!")
 
