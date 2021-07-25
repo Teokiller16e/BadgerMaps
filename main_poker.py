@@ -277,12 +277,13 @@ def hasTwoPair(firstCards,secondCards,playingCards,numOfPlayers):
             if(count>=2):
                 twoPairs.append(arr[i])
         
-    twoPairs = list(dict.fromkeys(twoPairs))
+    #twoPairs = list(dict.fromkeys(twoPairs))
+    twoPair = np.array(twoPairs)
 
     if(twoPairs):
-        return "TwoPairs",twoPairs
+        return "TwoPairs",twoPair
     elif(len(winningHands)>=2):
-        return "OnePair",winningHands
+        return "OnePair",arr
     else: return "False",[]
 
 # HasPair
@@ -320,9 +321,9 @@ def hasHighCard(firstCards,secondCards,numOfPlayers):
     winningHands = []
     higherCards = []
     for i in range (numOfPlayers):
-        if(firstCards[i][0] >= secondCards[i][0] or firstCards[i][0] == 1):
+        if((firstCards[i][0] >= secondCards[i][0]) or firstCards[i][0] == 1):
             higherCards.append(firstCards[i][0])
-        elif(firstCards[i][0] <= secondCards[i][0] or secondCards[i][0] == 1): 
+        elif((firstCards[i][0] <= secondCards[i][0]) or secondCards[i][0] == 1): 
             higherCards.append(secondCards[i][0])
     
     maximum = max(higherCards) 
@@ -361,7 +362,7 @@ def printWinner(resultCards):
     print(" \n")
 
 # Outcome possible conditions:
-def outcomes(res,strAnswer):
+def outcomes(res,strAnswer,playingCards):
     if(len(res)==2):
         print(strAnswer)
         print("Cards on the table : \n")
@@ -370,7 +371,69 @@ def outcomes(res,strAnswer):
         printWinner(res)
     elif(len(result)== 2*numOfPlayers):
         highCardSplit = hasHighCard(firstCards,secondCards,numOfPlayers)
+    else: 
+        if(strAnswer=="ThreeOfAKind" or strAnswer == "TwoPairs" or strAnswer=="OnePair"):
+            hasHigherPair(res,playingCards)
 
+
+# Higher Pair winner 
+def hasHigherPair(res,playingCards):
+
+    firstCards = []
+    secondCards = []
+    
+    winningPair = []
+        
+    for i in range(len(res)):
+        if(i%2==0):
+            firstCards.append(res[i])
+        else: secondCards.append(res[i])
+    
+    indx = np.empty(shape=[len(firstCards),1])
+
+    for i in range (len(firstCards)):
+        mixArray = np.empty(shape=[7,2])
+        tmp = 0
+        for j in range(len(playingCards)):
+            mixArray[j] = playingCards[j]
+        mixArray[5] = firstCards[i] # insert first player's card (of course we can j +1 but since we know it's final there is no use)
+        mixArray[6] = secondCards[i] # insert second player's card
+        sortedArr = mixArray[mixArray[:,0].argsort()]
+
+        for k in range(len(sortedArr)):
+            print(sortedArr[k,0])
+            if(firstCards[i][0] == sortedArr[k,0] or secondCards[i][0] == sortedArr[k,0]):
+                if((firstCards[i][0] == sortedArr[k,0] == 1) or (secondCards[i][0] == sortedArr[k,0] == 1)):
+                   tmp+= 14*14
+                   indx[i] = tmp
+                else:             
+                    tmp += sortedArr[k,0] * sortedArr[k,0]
+                    indx[i] = tmp
+            else:
+                continue
+
+    
+
+    if(len(indx) == 0):
+        return "Split",res
+    else:  
+        maximum = max(indx) 
+
+        indices = [index for index, value in enumerate(indx) if value == maximum or value == 1]
+
+        for i in range (len(indices)):
+            winningPair.append(firstCards[indices[i]])
+            winningPair.append(secondCards[indices[i]])
+
+        arr = np.array(winningPair) 
+        return arr
+
+def hasHigherStraight():
+    print()
+def hasHigherFlush():
+    print()
+
+    
 if __name__ == "__main__":
 
     symbols =  [0,1,2,3] # ['clubs','diamonds','hearts','spades']
@@ -385,9 +448,9 @@ if __name__ == "__main__":
         firstCards,secondCards = splitDeck(deckOfCards,numOfPlayers) # retrieve players cards
         playingCards = burnCards(deckOfCards) # retrieve shown up cards
         printInitialHands(firstCards,secondCards)
+
         # We have to check from the higher to the lower hand payoff so we can exclude as much as we can:
         result,RF = hasRoyalFlush(firstCards,secondCards,playingCards,numOfPlayers)
-
 
         # In this step we will check if have Royal Flush and in the Straight Flush all the between hierarchical winner hand will be checked one by one 
         if(RF):
@@ -396,23 +459,23 @@ if __name__ == "__main__":
             strOrFl,res = hasStraightFlush(firstCards,secondCards,playingCards,numOfPlayers)
 
             if (strOrFl=="STRAIGHTFLUSH"):
-                outcomes(res,strOrFl) # Case that straight flush is already on the table 
+                outcomes(res,strOrFl,playingCards) # Case that straight flush is already on the table 
             elif (strOrFl=="FOUROFAKIND"):
-                outcomes(res,strOrFl)# Case that four of a kind is already on the table
+                outcomes(res,strOrFl,playingCards)# Case that four of a kind is already on the table
             elif (strOrFl=="FLUSH"):
-                outcomes(res,strOrFl)# Case that flush is already on the table
+                outcomes(res,strOrFl,playingCards)# Case that flush is already on the table
             elif (strOrFl=="STRAIGHT"):
-                outcomes(res,strOrFl) # Case that straight is already on the table
+                outcomes(res,strOrFl,playingCards) # Case that straight is already on the table
             else:
                 strOfThree,res = hasThreeOfAKind(firstCards,secondCards,playingCards,numOfPlayers)
                 if (strOfThree=="ThreeOfAKind"):
-                    outcomes(res,strOfThree) # Case that straight is already on the table
+                    outcomes(res,strOfThree,playingCards) # Case that straight is already on the table
                 else:
                     strOfPairs,res = hasTwoPair(firstCards,secondCards,playingCards,numOfPlayers)
                     if(strOfPairs == "TwoPairs"):
-                        outcomes(res,strOfPairs)
+                        outcomes(res,strOfPairs,playingCards)
                     elif(strOfPairs=="OnePair"):
-                        outcomes(res,strOfPairs)
+                        outcomes(res,strOfPairs,playingCards)
                     else:
                         highCardSplit = hasHighCard(firstCards,secondCards,numOfPlayers)
                         printWinner(highCardSplit)
