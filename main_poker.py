@@ -77,7 +77,7 @@ def discard(playingCards,deck,flag):
     deck[indx] = 99
 
 
-# HasRoyalFlush
+# HasRoyal Flush
 def hasRoyalFlush(firstCards,secondCards,playingCards,numOfPlayers):
     winningHands = []
     for i in range (numOfPlayers):
@@ -101,6 +101,7 @@ def hasRoyalFlush(firstCards,secondCards,playingCards,numOfPlayers):
     else:
         return arr,False   
 
+# Straight Flush
 def hasStraightFlush(firstCards,secondCards,playingCards,numOfPlayers):
     
     winningHandsFlush,flagFLS = hasFlush(firstCards,secondCards,playingCards,numOfPlayers)
@@ -108,6 +109,7 @@ def hasStraightFlush(firstCards,secondCards,playingCards,numOfPlayers):
     winningHandsFourOfAKind,flagFour = hasFourOfAKind(firstCards,secondCards,playingCards,numOfPlayers)
     test = []
 
+    
     if(flagFLS and flagSTR):
         if(winningHandsFlush == winningHandsStraight):
             return "STRAIGHTFLUSH",winningHandsStraight
@@ -119,12 +121,12 @@ def hasStraightFlush(firstCards,secondCards,playingCards,numOfPlayers):
         return "STRAIGHT",winningHandsStraight
     else: return "none",test
 
-
+# Not yet implemented
 def hasFullHouse(firstCards,secondCards,playingCards,numOfPlayers):
     print("hello")
+    # basically we have to call the three of a kind and the has two pair function and if we find 3 cards and 2 different from the 2/3 then we have a full house
 
 # Straight
-# has to be tested
 def hasStraight(firstCards,secondCards,playingCards,numOfPlayers):
 
     winningHands = []
@@ -159,7 +161,7 @@ def hasStraight(firstCards,secondCards,playingCards,numOfPlayers):
     else:
         return arr,False
 
-# Flash
+# Flush
 def hasFlush(firstCards,secondCards,playingCards,numOfPlayers):
     winningHands = []
     for i in range (numOfPlayers):
@@ -256,7 +258,7 @@ def hasThreeOfAKind(firstCards,secondCards,playingCards,numOfPlayers):
                 
     arr = np.array(winningHands)
     if(winningHands):
-        return arr,True
+        return arr,"True"
     else:
         return arr,False
 
@@ -333,7 +335,7 @@ def hasHighCard(firstCards,secondCards,numOfPlayers):
     return arr,True # because it's the least strong combination and therefore there will always be a max number 
 
 # Print winner with symbol strings
-def printWinner(resultCards,symbols):
+def printWinner(resultCards):
     for i in range(len(resultCards)):
         if(resultCards[i,1] == 0):
             print(resultCards[i,0],"  clubs ",)
@@ -342,6 +344,7 @@ def printWinner(resultCards,symbols):
         elif (resultCards[i,1]==2):
             print(resultCards[i,0],"  hearts ",)
         else : print(resultCards[i,0],"  spades ",)
+    print(" \n")
 
 if __name__ == "__main__":
 
@@ -361,23 +364,45 @@ if __name__ == "__main__":
         result,RF = hasRoyalFlush(firstCards,secondCards,playingCards,numOfPlayers)
         # In this step we will check if have Royal Flush, Straight Flush, Straight or Flush
         if(RF):
-            printWinner(result)
+            if(len(result)==2):
+                    print(strOrFl)
+                    printWinner(playingCards)
+                    printWinner(result)
         else:
-            playingCards[0,0]=7
-            playingCards[1,0]=8
-            playingCards[2,0]=9
-            playingCards[3,0]=10
-            strOrFl,res = hasStraightFlush(firstCards,secondCards,playingCards,numOfPlayers) 
+            strOrFl,res = hasStraightFlush(firstCards,secondCards,playingCards,numOfPlayers)
+
             if (strOrFl=="STRAIGHTFLUSH"):
-                print()
+                if(len(res)==2):
+                    print(strOrFl)
+                    printWinner(playingCards)
+                    printWinner(res)
             elif (strOrFl=="FOUROFAKIND"):
-              print()
+              if(len(res)==2):
+                    print(strOrFl)
+                    printWinner(playingCards)
+                    printWinner(res)
             elif (strOrFl=="FLUSH"):
-              print()
+              if(len(res)==2):
+                    print(strOrFl)
+                    printWinner(playingCards)
+                    printWinner(res)
             elif (strOrFl=="STRAIGHT"):
-              print()
+              if(len(res)==2):
+                    print(strOrFl)
+                    printWinner(playingCards)
+                    printWinner(res)
             else:
-                print("None of the above")
+                strOrFl,res = hasThreeOfAKind(firstCards,secondCards,playingCards,numOfPlayers)
+                if (strOrFl==True):
+                    if(len(res)==2):
+                        print(strOrFl)
+                        printWinner(playingCards)
+                        printWinner(res)
+                elif(strOrFl==False):
+                    strOfPairs,res = hasTwoPair(firstCards,secondCards,playingCards,numOfPlayers)
+
+
+
         answer = int(input("Give a positive number to play another round\n"))
     print("Today's match is over !!")
 
